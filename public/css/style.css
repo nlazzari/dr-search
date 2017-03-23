@@ -1,0 +1,22 @@
+body {
+  font-family: Avenir, Helvetica, sans-serif;
+}
+
+a {
+  color: black;
+  text-decoration: none;
+  border-bottom: 0px solid black;
+}
+
+a:link {
+
+}
+
+a:visited {
+
+    color: black;
+}
+
+a:hover {
+    border-bottom: 1px solid black;
+}

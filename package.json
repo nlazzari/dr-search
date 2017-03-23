@@ -1,0 +1,27 @@
+{
+  "name": "todo-list",
+  "version": "0.0.1",
+  "description": "Choose your preferred language",
+  "main": "app.js",
+  "repository": {},
+  "scripts": {
+    "start": "nodemon app.js",
+    "debug": "node --inspect app.js"
+  },
+  "author": "Neal Lazzari",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.16.0",
+    "cheerio": "^0.22.0",
+    "cookie-parser": "^1.4.3",
+    "ejs": "^2.5.5",
+    "express": "^4.14.1",
+    "jsdom": "^9.12.0",
+    "morgan": "^1.7.0",
+    "pg": "^6.1.2",
+    "request": "^2.79.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
+  }
+}

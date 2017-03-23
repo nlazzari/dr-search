@@ -1,0 +1,30 @@
+ul.debug
+, ul.debug_wired {
+	list-style: none;
+	margin: 0px;
+	padding: 0px;
+}
+ul.debug > li > a
+, ul.debug_wired > li > a {
+	display: block;
+}
+ul.debug > li > pre
+, ul.debug_wired > li > pre {
+	display: inline-block;
+	width: 100%;
+}
+.function_name {
+}
+ul.function_data {
+	list-style: none;
+	margin: 0px;
+	padding: 0px;
+	margin-left: 10px;
+}
+ul.function_data>li {
+}
+.data_key {
+	font-weight: bold;
+}
+.data_value {
+}

@@ -1,0 +1,17 @@
+
+<%- include('partials/header') %>
+<span><a href="/">New</a></span> <span>|</span>
+<span><a href="/todos">Todo-List</a></span> <span>|</span>
+<span><a href="/reset">Reset</a></span>
+<br>
+
+<h1>To-do:</h1>
+
+    <ul>
+       <% for(let todo of todoList) { %>
+         <li><%= todo %></li>
+       <% } %>
+   </ul>
+
+
+<%- include('partials/footer') %>

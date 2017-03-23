@@ -1,0 +1,21 @@
+<%- include('partials/header') %>
+    <span><a href="/">New</a></span> <span>|</span>
+    <span><a href="/todos">Todo-List</a></span> <span>|</span>
+    <span><a href="/reset">Reset</a></span>
+    <br>
+
+    <h1>Enter a new item:</h1>
+
+    <form method="post" action>
+      <div>
+        <label for="todo">Title:</label>
+        <input id="todo" name="todo" value="">
+      </div>
+
+      <div>
+        <input type="submit" name="submit">
+      </div>
+    </form>
+
+
+<%- include('partials/footer') %>
