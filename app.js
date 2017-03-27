@@ -6,7 +6,7 @@ const cookieParser = require('cookie-parser');
 
 
 // Load routers from the routes folder
-const home = require('./routes/home');
+// const home = require('./routes/home');
 const find = require('./routes/find');
 
 // Create an instance of Express by calling the Express function
@@ -30,7 +30,7 @@ app.use(cookieParser());
 app.use(logger('dev'));
 
 //Register routes
-app.use('/', home);
+// app.use('/', home);
 app.use('/physician_search', find);
 
 const PORT = 4545;
