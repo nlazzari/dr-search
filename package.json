@@ -16,6 +16,7 @@
     "cookie-parser": "^1.4.3",
     "ejs": "^2.5.5",
     "express": "^4.14.1",
+    "humanparser": "^1.1.1",
     "jsdom": "^9.12.0",
     "morgan": "^1.7.0",
     "pg": "^6.1.2",

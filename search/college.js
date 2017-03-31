@@ -1,39 +1,24 @@
-// const Express       = require('express');
-// const router        = Express.Router();
-const request       = require('request');
-const cheerio       = require('cheerio')
+const request       = require('request-promise-native');
+const cheerio       = require('cheerio');
 const queryString   = require('querystring');
-
-let $ = cheerio.load('<div></div>');
-var resultsData = [];
+const human         = require('humanparser');
 
 const URL_BASE   = 'https://www.cpsbc.ca';
 const URL_PATH   = '/physician_search';
 const URL_SEARCH = `${URL_BASE}${URL_PATH}`;
+let $            = cheerio.load('<div></div>');
 
-// jQuery/CSS selector strings.
-// '_REL' strings are relative to the base string 'SELECTOR_RESULT_ROW'
-// ie. 'td > a' means relative to the
-//              full string `${SELECTOR_RESULT_ROW} td > a`
-const SELECTOR_RESULT_ROW     = '#college-physio-search tbody tr';
-const SELECTOR_PAGE_LIST      = 'ul.pager.inline.item-list li';
-const SELECTOR_REL_FULL_NAME  = 'td > a';
-const SELECTOR_REL_ADDRESS    = 'div.physio-address-data';
-const SELECTOR_REL_PHONE      = 'ul.address-list li';
-const SELECTOR_REL_GENDER     = 'td:nth-child(3)';
-const SELECTOR_REL_LANGUAGE   = 'td:nth-child(5) li';
-const SELECTOR_FORM_TOKEN     = '[name="filter[nonce]"]';
 
 // This object will be serialized into query strings for building the search URL
 //  ie. ?filter_first_name=Joe&filter_last_name=Blo&....
 let queryParamsObject = {
         filter_first_name: '',
         filter_last_name: '',
-        filter_city: 'Vancouver',
+        filter_city: '',
         filter_gp_or_spec: 'G',
         filter_specialty: '',
         filter_accept_new_pat: '1',
-        filter_gender: '',
+        filter_gender: '',          // 'M' or 'F' (blank for both)
         filter_active: 'Y',
         filter_radius: '',
         filter_postal_code: '',
@@ -41,6 +26,19 @@ let queryParamsObject = {
         filter_nonce: '',
         page: '0'
 }
+
+
+// jQuery/CSS selector strings for parsing page data with Cheerio.
+// '_REL' strings are relative to the base string 'SELECTOR_RESULT_ROW'
+// ie. 'td > a' means relative to the
+//              full string `${SELECTOR_RESULT_ROW} td > a`
+const SELECTOR_RESULT_ROW     = '#college-physio-search tbody tr';
+const SELECTOR_PAGE_LIST      = 'ul.pager.inline.item-list li';
+const SELECTOR_REL_FULL_NAME  = 'td > a';
+const SELECTOR_REL_CONTACT    = 'ul.address-list li';
+const SELECTOR_REL_GENDER     = 'td:nth-child(3)';
+const SELECTOR_REL_LANGUAGE   = 'td:nth-child(5) li';
+const SELECTOR_FORM_TOKEN     = '[name="filter[nonce]"]';
 
 ////////// FUNCTIONS /////////////////
 
@@ -75,28 +73,64 @@ function parseFormTokenToQueryParams() {
 }
 
 function parseNameString(rowElement) {
-  const parsedName = $(rowElement).find(SELECTOR_REL_FULL_NAME)[0]
-                                  .children[0].data;
-  const lastName = parsedName.split(', ')[0];
+  const parsedName      = $(rowElement).find(SELECTOR_REL_FULL_NAME)[0]
+                                       .children[0].data;
+  const lastName        = parsedName.split(', ')[0];
   const firstMiddleName = parsedName.split(', ')[1].split(' »')[0];
+  const fullName        = `${firstMiddleName} ${lastName}`;
+  const nameObject      = human.parseName(fullName);
 
-  return `${firstMiddleName} ${lastName}`;
+  return {
+            first: nameObject.firstName,
+            middle: nameObject.middleName ? nameObject.middleName : '',
+            last: nameObject.lastName,
+         };
 }
 
-function parseAddressString(rowElement) {
+// Given a contact li element, return an array of address line strings
+function parseAddressLines(li) {
   let address = [];
-  $(rowElement).find(SELECTOR_REL_ADDRESS)[0].children.forEach((line) => {
+  li.children[0].children.forEach((line) => {
     if(line.type === 'text') {
       address.push(line.data);
     }
   });
-
-  return address.join(',');
+  return address;
 }
 
-function parsePhoneString(rowElement) {
-  return $(rowElement).find(SELECTOR_REL_PHONE)[0]
-                      .lastChild.data.replace(/\D/g,'');
+// Given a contact li element, return phone number (if it exists) as a
+// string with non numerical characters removed
+function parsePhoneNumber(li) {
+  return      li.lastChild.data                      ?
+            `${li.lastChild.data}`.replace(/\D/g,'') : '';
+}
+
+function parseContactInfo(rowElement) {
+  // array of li elements containing contact info (address, and phonenumber)
+  const contactListEls  = $(rowElement).find(SELECTOR_REL_CONTACT);
+  const numContacts     = contactListEls.length; //number of addresses/phone#'s
+  let   contactList     = []; // store each set of contact info (address, phone)
+
+  // Loop through each set of contact info (address and phone number)
+  for(let i = 0; i < numContacts; i++) {
+    // Get the array of address line strings
+    let address = parseAddressLines(contactListEls[i]);
+
+    // Get the phone number if there is one listed
+    let phone  = parsePhoneNumber(contactListEls[i]);
+
+    // Only save addresses that are in BC to the contactList array
+    if(/BC/.test(address.join(' '))) {
+        contactList.push({
+          streetAddress:  address.slice(0, address.length-2).join(',') ,
+          city:           address[address.length-2].split(', ')[0] ,
+          province:       address[address.length-2].split(', ')[1] ,
+          postalCode:     address[address.length-1],
+          phoneNumber:    phone
+        });
+    }
+  }
+  return contactList;
 }
 
 function parseGenderString(rowElement) {
@@ -120,15 +154,19 @@ function parseLanguageStrings(rowElement) {
 }
 
 function parseOneRowObject(row) {
+  const name      = parseNameString(row);
+
   return {
-            name:     parseNameString(row),
-            address:  parseAddressString(row),
-            phone:    parsePhoneString(row),
-            gender:   parseGenderString(row),
-            language: parseLanguageStrings(row)
+            firstName:  name.first,
+            middleName: name.middle,
+            lastName:   name.last,
+            gender:     parseGenderString(row),
+            contactInfo:  parseContactInfo(row),
+            languages:  parseLanguageStrings(row)
           };
 }
 
+// Returns an array of parsed data objects (Doctor information)
 function parseAllRowsObjects() {
   const rows      = getResultRowElements();
   const numRows   = rows.length;
@@ -142,76 +180,81 @@ function parseAllRowsObjects() {
 }
 /////////// REQUESTS //////////////
 
-// Request #1: Parse Form Token
-request.get({
-  	url: URL_SEARCH,
-  	jar: true
-  },
-    (error, response, html) => {
-      if(error) {
-        console.log('error:', error); // Print the error if one occurred
-      }
-      else {
-        // Print the response status code if a response was received
-        console.log('statusCode:', response && response.statusCode);
+function requestPageData(queryParams) {
+  const { firstName='', lastName='',  city='',
+          gender='',    radius='',    postalCode='',
+          language='' } = queryParams;
+  let     resultsData = [];
+
+  queryParamsObject.filter_first_name   = firstName;
+  queryParamsObject.filter_last_name    = lastName;
+  queryParamsObject.filter_city         = city;
+  queryParamsObject.filter_gender       = gender;
+  queryParamsObject.filter_radius       = radius;
+  queryParamsObject.filter_postal_code  = postalCode;
+  queryParamsObject.filter_language     = language;
+
+
+
+  return (
+  // Request #1: Parse Form Token
+  request.get({
+    	url: URL_SEARCH,
+    	jar: true
+    })
+      .then(html => {
         $ = cheerio.load(html);
         let body = $('body');
-
         const formToken = parseFormTokenToQueryParams();
-        console.log('Nonce token: ', formToken);
 
         // Request #2: Get first page of results, and determine number of pages
-        request.get({
-          	url:  `${URL_SEARCH}?${queryString.stringify(queryParamsObject)}`,
-          	jar: true
-          },
-            (error, response, htmlResult) => {
-              if(error) {
-                console.log('error:', error); // Print the error if one occurred
-              }
-              else {
+        return request.get({
+            url:  `${URL_SEARCH}?${queryString.stringify(queryParamsObject)}`,
+            jar: true
+          });
+      })
+      .then(htmlResult => {
+        $                 = cheerio.load(htmlResult);
+        body              = $('#college-physio-search').html();
+        let results       = parseAllRowsObjects();
+        let numRows       = results.length;
+        let numPages      = numPageResults();
+        resultsData       = resultsData.concat(results);
 
-                $ = cheerio.load(htmlResult);
-                const formToken = parseFormTokenToQueryParams();
-                body = $('#college-physio-search').html();
+        // Request #3+ : Create array of Request promises to return
+        let requestPromises = [];
+        for(let page = 1; page < numPages; page++) {
+            queryParamsObject.page = `${page}`;
+            requestPromises.push(
+              request.get({
+                  url:  `${URL_SEARCH}?${queryString
+                                            .stringify(queryParamsObject)}`,
+                  jar: true
+                }));
+        }
 
-                let results       = parseAllRowsObjects();
-                let numRows       = results.length;
-                let numPages      = numPageResults();
+        return Promise.all(requestPromises);
+      })
+      .then(htmlPageArray => {
+          htmlPageArray.forEach(htmlPage => {
+              $                 = cheerio.load(htmlPage);
+              const pageResults = parseAllRowsObjects();
+              resultsData       = resultsData.concat(pageResults);
+          });
 
-                resultsData = resultsData.concat(results);
+          // return new Promise((resolve, reject) => { resolve(resultsData) });
+          return resultsData;
+      })
+    );
 
-                console.log('Pages of results', numPages);
-                // console.log(results);
+}
 
-                // Request #3+ : Loop and get results from other pages
-                for(let page=1; page < numPages; page++) {
-                    queryParamsObject.page = `${page}`;
-                    // console.log('entereted the loop!');
-                    request.get({
-                      	url:  `${URL_SEARCH}?${queryString.stringify(queryParamsObject)}`,
-                      	jar: true
-                      }, (error, response, htmlPage) => {
-                          if(error) {
-                            console.log('error:', error); // Print the error if one occurred
-                          }
-                          else {
-                            console.log('Request for page ', page);
-                            $ = cheerio.load(htmlPage);
-                            const pageResults = parseAllRowsObjects();
-                            // console.log(pageResults);
-                            resultsData = resultsData.concat(pageResults);
-                          }
-                    });
+// requestPageData({city: 'Surrey', gender: 'F'})
+// .then(results => {
+//   console.dir( results , { depth: null });
+// })
+// .catch(error => {
+//   console.log('Errors: ', error);
+// });
 
-                }
-                setTimeout( ()=>{ console.log(resultsData); }, 5000);
-                // console.log(resultsData);
-
-        }});
-
-
-
-    }
-
-});
+module.exports = requestPageData;

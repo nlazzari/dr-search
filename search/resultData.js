@@ -1,4 +1,8 @@
-[ { name: 'Nathan Batt',
+// Search results from the college of surgeons for Vancouver:
+const human = require('humanparser');
+
+let results = [
+  { name: 'Nathan Batt',
     address: '2032 Kingsway,Vancouver, BC,V5N 2T3',
     phone: '6048745555',
     gender: 'Male',
@@ -48,36 +52,6 @@
     phone: '6046818735',
     gender: 'Male',
     language: [ 'Polish', 'Russian' ] },
-  { name: 'Gabriel Jacobus van den Berg',
-    address: '3185 Grandview Hwy,Pacific Medical Clinic,Vancouver, BC,V5M 2E9',
-    phone: '6044342222',
-    gender: 'Male',
-    language: [ 'Afrikaans' ] },
-  { name: 'Jan Frederick Venter',
-    address: 'False Creek Healthcare,6th Floor 555 West 8th Ave.,Vancouver, BC,V5Z 1C6',
-    phone: '6047399695',
-    gender: 'Male',
-    language: [ 'Afrikaans' ] },
-  { name: 'Charles Dewar Webb',
-    address: '102-8584 Granville St,Vancouver, BC,V6P 4Z7',
-    phone: '6042661496',
-    gender: 'Male',
-    language: [ 'Afrikaans' ] },
-  { name: 'Robert Frederick Woollard',
-    address: 'David Strangway Building, UBC Department of Family Practice,320-5950 University Blvd,Vancouver, BC,V6T 1Z3',
-    phone: '6048225431',
-    gender: 'Male',
-    language: [] },
-  { name: 'Jonathan Charles Yang',
-    address: 'Highroads Medical Clinics Kerrisdale,5960 East Boulevard,Vancouver, BC,V6M 3V4',
-    phone: '6042634750',
-    gender: 'Male',
-    language: [] },
-  { name: 'Gordon Heung De Yip',
-    address: '3317 Wesbrook Mall,Vancouver, BC,V6S 0B1',
-    phone: '6042597744',
-    gender: 'Male',
-    language: [] },
   { name: 'Ramesh Krishna Kamath',
     address: 'Simply Wellness Medical,1818 Kingsway,Vancouver, BC,V5N 2S7',
     phone: '6047099355',
@@ -177,4 +151,52 @@
     address: '6408 Main Street,Vancouver, BC,V5W2V4',
     phone: '6045685667',
     gender: 'Male',
-    language: [ 'Hindi', 'Punjabi', 'Urdu' ] } ]
+    language: [ 'Hindi', 'Punjabi', 'Urdu' ] },
+  { name: 'Gabriel Jacobus van den Berg',
+    address: '3185 Grandview Hwy,Pacific Medical Clinic,Vancouver, BC,V5M 2E9',
+    phone: '6044342222',
+    gender: 'Male',
+    language: [ 'Afrikaans' ] },
+  { name: 'Jan Frederick Venter',
+    address: 'False Creek Healthcare,6th Floor 555 West 8th Ave.,Vancouver, BC,V5Z 1C6',
+    phone: '6047399695',
+    gender: 'Male',
+    language: [ 'Afrikaans' ] },
+  { name: 'Charles Dewar Webb',
+    address: '102-8584 Granville St,Vancouver, BC,V6P 4Z7',
+    phone: '6042661496',
+    gender: 'Male',
+    language: [ 'Afrikaans' ] },
+  { name: 'Robert Frederick Woollard',
+    address: 'David Strangway Building, UBC Department of Family Practice,320-5950 University Blvd,Vancouver, BC,V6T 1Z3',
+    phone: '6048225431',
+    gender: 'Male',
+    language: [] },
+  { name: 'Jonathan Charles Yang',
+    address: 'Highroads Medical Clinics Kerrisdale,5960 East Boulevard,Vancouver, BC,V6M 3V4',
+    phone: '6042634750',
+    gender: 'Male',
+    language: [] },
+  { name: 'Gordon Heung De Yip',
+    address: '3317 Wesbrook Mall,Vancouver, BC,V6S 0B1',
+    phone: '6042597744',
+    gender: 'Male',
+    language: [] }
+  ];
+
+  let names = [];
+
+  let resultName = "";
+  let nameObject = {};
+
+  for(result of results) {
+    nameObject = human.parseName(result.name);
+    names.push({
+      firstName: nameObject.firstName,
+      middleName: nameObject.middleName ? nameObject.middleName : '',
+      lastName: nameObject.lastName
+    });
+  }
+
+
+  console.log(names);
