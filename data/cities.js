@@ -43,3 +43,5 @@ const cities =
   `Slocan`, `Granisle`, `Tahsis`, `Hazelton`, `Lytton`, `Wells`, `Silverton`,
   `Zeballos`
 ];
+
+module.exports = cities;

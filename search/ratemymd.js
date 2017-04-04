@@ -3,8 +3,10 @@ const cheerio       = require('cheerio');
 const queryString   = require('querystring');
 const human         = require('humanparser');
 
+const URL_BASE      = 'https://www.ratemds.com';
 let $               = cheerio.load('<div></div>');
 
+const REQUEST_TIMEOUT_MS = 10*60*1000; //10 mins
 
 // jQuery/CSS selector strings for parsing page data with Cheerio.
 // '_REL' strings are relative to the base string 'SELECTOR_'
@@ -12,7 +14,7 @@ let $               = cheerio.load('<div></div>');
 //              full string `${SELECTOR_RESULT_ROW} td > a`
 const SELECTOR_RESULT_ROW = 'div#doctor-list div.search-item.doctor-profile';
 const SELECTOR_REL_STAR_RATING = 'span.star-rating'; //title
-
+const SELECTOR_DR_PROFILE_LINK = 'a.search-item-doctor-link';
 ////////// FUNCTIONS /////////////////
 
 // Returns an array of all table row elements containing the result data
@@ -24,15 +26,20 @@ function getResultRowElements() {
 function getStarRating(rowElement) {
   const ratingSpan = $(rowElement).find(SELECTOR_REL_STAR_RATING)[0];
   return parseFloat(ratingSpan.attribs.title);
-}  
+}
+
+function getDoctorProfileLink(rowElement) {
+  const profileAnchor = $(rowElement).find(SELECTOR_DR_PROFILE_LINK)[0];
+  return `${URL_BASE}${profileAnchor.attribs.href}`;
+}
 
 /////////// REQUESTS //////////////
 
 function requestPageData(queryParams) {
   const { firstName='', lastName='',  city='Vancouver' } = queryParams;
-  const URL_BASE   = 'https://www.ratemds.com';
   const URL_PATH   = `/best-doctors/bc/` +
-                     `${city.toLowerCase().replace(' ', '-')}/family-gp/`;
+      `${city.toLowerCase().replace(/\s+/g, '-').replace('.', '')}/family-gp/`;
+
   const URL_SEARCH = `${URL_BASE}${URL_PATH}`;
   let  resultsData = [];
 
@@ -47,13 +54,28 @@ function requestPageData(queryParams) {
 
   request.get({
     	url: `${URL_SEARCH}?${queryString.stringify(queryParamsObject)}`,
-    	jar: true
+    	jar: true,
+      timeout: REQUEST_TIMEOUT_MS
     })
       .then(html => {
         $ = cheerio.load(html);
-        let resultRows = getResultRowElements();
+        const resultRows    = getResultRowElements();
+        const numRows       = resultRows.length;
+        const row1          = resultRows[0];
+        let   result       = null;
 
-        console.log( getStarRating(resultRows[0]) );
+        if(row1) {
+          result = {
+                      starRating:   getStarRating(row1),
+                      profileLink:  getDoctorProfileLink(row1),
+                      searchLink:   `${URL_SEARCH}`
+                                +`?${queryString.stringify(queryParamsObject)}`,
+                      resultsCount: numRows
+                    };
+        }
+
+        return result;
+        // console.dir( results );
       })
 
     ); //   /return

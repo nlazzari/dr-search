@@ -1,5 +1,5 @@
 {
-  "name": "todo-list",
+  "name": "dr-search",
   "version": "0.0.1",
   "description": "Choose your preferred language",
   "main": "app.js",
@@ -16,12 +16,17 @@
     "cookie-parser": "^1.4.3",
     "ejs": "^2.5.5",
     "express": "^4.14.1",
+    "fs-promise": "^2.0.2",
     "humanparser": "^1.1.1",
-    "jsdom": "^9.12.0",
+    "knex": "^0.12.9",
+    "lodash": "^4.17.4",
     "morgan": "^1.7.0",
-    "pg": "^6.1.2",
+    "objection": "^0.7.12",
+    "objection-timestamp": "^1.1.0",
+    "pg": "^6.1.5",
     "request": "^2.79.0",
-    "request-promise-native": "^1.0.3"
+    "request-promise-native": "^1.0.3",
+    "run-at": "^2.1.0"
   },
   "devDependencies": {
     "nodemon": "^1.11.0"

@@ -1,9 +1,14 @@
-const Express = require('express');
-const logger = require('morgan');
-const bodyParser = require('body-parser');
-const path = require('path');
-const cookieParser = require('cookie-parser');
+const Express       = require('express');
+const _             = require('lodash');
+const logger        = require('morgan');
+const bodyParser    = require('body-parser');
+const path          = require('path');
+const cookieParser  = require('cookie-parser');
 
+// Database connection
+const knex  = require('./config/database');  // Create the knex connection
+const Model = require('objection').Model;
+      Model.knex(knex); // Bind all Models to a knex instance
 
 // Load routers from the routes folder
 // const home = require('./routes/home');

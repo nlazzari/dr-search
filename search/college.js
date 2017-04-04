@@ -8,6 +8,7 @@ const URL_PATH   = '/physician_search';
 const URL_SEARCH = `${URL_BASE}${URL_PATH}`;
 let $            = cheerio.load('<div></div>');
 
+const REQUEST_TIMEOUT_MS = 20000;
 
 // This object will be serialized into query strings for building the search URL
 //  ie. ?filter_first_name=Joe&filter_last_name=Blo&....
@@ -138,10 +139,10 @@ function parseGenderString(rowElement) {
 }
 
 function parseLanguageStrings(rowElement) {
-  const languageCell =  $(rowElement).find(SELECTOR_REL_LANGUAGE);//[0];//.children[0].data;
-                                    //  .children[0].children[0];
+  const languageCell =  $(rowElement).find(SELECTOR_REL_LANGUAGE);
+
   let languageStrings = [];
-  let languageElements = [];
+  // let languageElements = [];
 
   if(languageCell.length > 0) {
 
@@ -149,7 +150,7 @@ function parseLanguageStrings(rowElement) {
       languageStrings.push(languageCell[i].children[0].data);
     }
   }
-  return languageStrings;
+  return languageStrings.join(',');
   // return languageCell;
 }
 
@@ -161,8 +162,8 @@ function parseOneRowObject(row) {
             middleName: name.middle,
             lastName:   name.last,
             gender:     parseGenderString(row),
-            contactInfo:  parseContactInfo(row),
-            languages:  parseLanguageStrings(row)
+            languages:  parseLanguageStrings(row),
+            contactInfo:  parseContactInfo(row)
           };
 }
 
@@ -200,7 +201,8 @@ function requestPageData(queryParams) {
   // Request #1: Parse Form Token
   request.get({
     	url: URL_SEARCH,
-    	jar: true
+    	jar: true,
+      timeout: REQUEST_TIMEOUT_MS
     })
       .then(html => {
         $ = cheerio.load(html);
@@ -210,7 +212,8 @@ function requestPageData(queryParams) {
         // Request #2: Get first page of results, and determine number of pages
         return request.get({
             url:  `${URL_SEARCH}?${queryString.stringify(queryParamsObject)}`,
-            jar: true
+            jar: true,
+            timeout: REQUEST_TIMEOUT_MS
           });
       })
       .then(htmlResult => {
@@ -229,7 +232,8 @@ function requestPageData(queryParams) {
               request.get({
                   url:  `${URL_SEARCH}?${queryString
                                             .stringify(queryParamsObject)}`,
-                  jar: true
+                  jar: true,
+                  timeout: REQUEST_TIMEOUT_MS
                 }));
         }
 
@@ -249,7 +253,7 @@ function requestPageData(queryParams) {
 
 }
 
-// requestPageData({city: 'Surrey', gender: 'F'})
+// requestPageData({city: 'Vancouver', gender: 'F'})
 // .then(results => {
 //   console.dir( results , { depth: null });
 // })

@@ -16,3 +16,5 @@ const languages =
   'Vietnamese (south)', 'Welsh', 'Xliosa', 'Yiddish/jewish', 'Yoruba',
   'Yugoslavian', 'Zulu'
 ];
+
+module.exports = languages;
