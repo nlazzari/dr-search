@@ -1,3 +1,6 @@
+// This script saves doctorData (a Javascript constant array of data)
+// into the database
+
 // Database connection
 const knex  = require('../config/database');  // Create the knex connection
 const Model = require('objection').Model;

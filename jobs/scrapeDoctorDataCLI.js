@@ -7,6 +7,7 @@
 // 4) Append the ratings data to the array of doctor data from 2)
 // 5) Append all restults into a text file
 
+// Note: last city scraped: index 50 
 
 // Page scraping scripts
 const college   = require('../search/college');

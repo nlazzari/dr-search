@@ -12,7 +12,7 @@ const Model = require('objection').Model;
 
 // Load routers from the routes folder
 // const home = require('./routes/home');
-const find = require('./routes/find');
+const api = require('./routes/api');
 
 // Create an instance of Express by calling the Express function
 const app = Express();
@@ -36,7 +36,7 @@ app.use(logger('dev'));
 
 //Register routes
 // app.use('/', home);
-app.use('/physician_search', find);
+app.use('/api', api);
 
 const PORT = 4545;
 app.listen(PORT, function() {
