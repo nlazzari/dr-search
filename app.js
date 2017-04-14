@@ -4,6 +4,7 @@ const logger        = require('morgan');
 const bodyParser    = require('body-parser');
 const path          = require('path');
 const cookieParser  = require('cookie-parser');
+const cors          = require('cors');
 
 // Database connection
 const knex  = require('./config/database');  // Create the knex connection
@@ -28,6 +29,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // adds cookie object to response (res.cookie).
 app.use(cookieParser());
+
+// Enable cors middleware for running localhost demos ** REMOVE ON DEPLOY
+app.use(cors());
 
 
 // unlike get (which only intercepts get method request),

@@ -3,7 +3,7 @@ const languages =
   'Afrikaans', 'Arabic', 'Armenian', 'Bengali', 'Bulgarian', 'Burmese',
   'Cantonese', 'Castellano', 'Catalan', 'Chinese', 'Croatian', 'Czech', 'Danish',
   'Dari', 'Dutch', 'Estonian', 'Ethiopian', 'Farsi', 'Fijian', 'Finnish',
-  'Foochow', 'Fookien', 'French', 'Fries', 'Fukien', 'Gaelic', 'German', 'Greek',
+  'Foochow', 'Fookien', 'French', 'Fukien', 'Gaelic', 'German', 'Greek',
   'Gujarati', 'Hakka', 'Hausa', 'Hebrew', 'Hindi', 'Hokkien', 'Hungarian',
   'Icelandic', 'Indonesian', 'Iranian/persian', 'Irish', 'Italian', 'Japanese',
   'Kachi', 'Kannada', 'Kikuyu', 'Kiswahili', 'Konkani', 'Korean', 'Kutchi',
