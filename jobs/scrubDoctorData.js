@@ -2,13 +2,15 @@
 // removes duplicate entries, and then appends it to doctorDataJs with the
 // scrubbed data array set as a javascript constant (and modeule.exports).
 //
-// doctorDataJs is now ready to be inserted into the database.
+// doctorDataJs is now ready to be inserted into the database using the script
+// saveDoctorData.js .
 
 
 const file            = require('fs-promise');
 const doctorDataFile  = 'doctorData.txt';
 const doctorDataJs    = 'doctorData.js'
 
+// takes an array of doctor records, and returns only unique doctor records
 function uniqueDoctors(doctors) {
   const namesAdded = [];
   const uniqueDocs = [];
@@ -33,24 +35,35 @@ function fileRead(fileName) {
   return file.readFile(__dirname + '/../data/' + fileName, {encoding:'utf8'});
 }
 
+// Read all doctor object records from doctorDataFile, parse them into a JSON
+// array,
 fileRead(doctorDataFile)
   .then((data) => {
     let    flattened  = [];
     let    js = '';
-    const  doctors    = JSON.parse(`[${data}]`);
 
+    // Remove the extra comma and \n at the end of the file,
+    // then parse into an array
+    const  doctors    = JSON.parse(`[${data.slice(0, data.length-2)}]`);
+
+    // flatten the nested array structure
     doctors.forEach(doctor => {
       flattened = flattened.concat(doctor);
     });
 
+    // remove duplicate doctor records
     flattened = uniqueDoctors(flattened);
 
     console.dir(flattened,  { depth: null });
 
+    // make template text that is declaring the scrubbed data
+    // as a giant javascript array
     js = `const doctors = \n\n` +
           `${JSON.stringify(flattened)}\n\n` +
           `module.exports = doctors;` ;
 
+    // add the javascript template text to doctorDataJs to be imported into
+    // the database using saveDoctorData.js
     return fileAppend(doctorDataJs, js );
   })
   .then( err => {

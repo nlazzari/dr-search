@@ -5,9 +5,9 @@
 // 2) Return an array of results scraped from all pages from 1)
 // 3) Request and scrape ratings for each doctor in 2) from RateMyMD
 // 4) Append the ratings data to the array of doctor data from 2)
-// 5) Append all restults into a text file
+// 5) Append all restults into a text file ( ../data/doctorData.js)
 
-// Note: last city scraped: index 50 
+// Note: last city scraped: index 50
 
 // Page scraping scripts
 const college   = require('../search/college');

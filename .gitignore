@@ -59,3 +59,6 @@ typings/
 
 #config file for environment variables
 /config/env.js
+
+#scratchpad file for testing new features
+./test.js
