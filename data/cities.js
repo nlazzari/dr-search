@@ -10,8 +10,9 @@
 // Tier 3: 101 - 158    (Sicamous to Zeballos)
 //                      Search once/month
 
+let cities = {};
 
-const cities =
+cities.list =
 [
   `Vancouver`, `Surrey`, `Burnaby`, `Richmond`, `Langley`, `Coquitlam`,
   `Abbotsford`, `North Vancouver`, `Kelowna`, `Saanich`, `Delta`, `Nanaimo`,
@@ -43,5 +44,19 @@ const cities =
   `Slocan`, `Granisle`, `Tahsis`, `Hazelton`, `Lytton`, `Wells`, `Silverton`,
   `Zeballos`
 ];
+
+cities.getIndex = function(city) {
+	return this.list.indexOf(city);
+}
+
+cities.printList = function()  {
+	console.log(' Index\t\t\tCity');
+	console.log('------------------------------------------');
+
+	this.list.forEach( (city,i,arr) => {
+    console.log(`   ${i}\t\t\t${city}`);
+	});
+}
+
 
 module.exports = cities;

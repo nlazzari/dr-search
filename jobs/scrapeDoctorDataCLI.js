@@ -19,7 +19,7 @@ const doctorDataFile  = 'doctorData.txt';
 const arg             = process.argv[2]; //commandline argument
 
 // Constants
-const cityList = require('../data/cities');
+const cityList = require('../data/cities').list;
 const cityArg  = cityList[parseInt(arg)]; // city chosen by the index argument
 
 
