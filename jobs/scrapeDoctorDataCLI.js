@@ -15,7 +15,7 @@ const rateMyMD  = require('../search/rateMyMD');
 
 // File I/O
 const file            = require('fs-promise');
-const doctorDataFile  = 'doctorData.txt';
+const doctorDataFile  = 'doctorData.dat';
 const arg             = process.argv[2]; //commandline argument
 
 // Constants

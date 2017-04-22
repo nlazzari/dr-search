@@ -1,5 +1,5 @@
 const file            = require('fs-promise');
-const doctorDataFile  = 'doctorData.txt';
+const doctorDataFile  = 'doctorData.dat';
 const doctorDataJs    = 'doctorData.js';
 
 function fileWrite(fileName, data) {

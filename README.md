@@ -3,7 +3,7 @@
 
 A Node.js service that helps you find the best family doctor in British Columbia.
 
-It scrapes data from the [College of Physicians and Surgeons of British Columbia](https://www.cpsbc.ca/physician_search) to find family doctors accepting new patients. It uses this data to search for any reviews present on [RateMDs](https://www.ratemds.com/). Doctor and Review records are persisted to a database, and served to a [React client](https://github.com/nlazzari/dr-search-client) via a RESTful JSON API.
+It scrapes data from the [College of Physicians and Surgeons of British Columbia](https://www.cpsbc.ca/physician_search) to find family doctors accepting new patients. It uses this data to search for any reviews present on [RateMDs](https://www.ratemds.com/). Doctor and Review records are persisted to a database, whose data is served to a [React client](https://github.com/nlazzari/dr-search-client) via a RESTful JSON API.
 
 
 
@@ -53,7 +53,7 @@ Next, run the knex migrations, which will create all the necessary database tabl
 $ knex migrate:latest
 ```  
 
-Seed the database with pre-scraped data by running this job script:
+Seed the database with pre-scraped data (doctors accepting patients residing in the top 50 largest municipalities by population) by running this job script:
 ```
 $ node jobs/seedDoctorData.js
 ```
@@ -73,10 +73,14 @@ To use the service, please see the repo for the [React client](https://github.co
 
 ## Scraping Data
 ### Background
- Due to limitations of how many requests can be made to the data source sites at one time (before they refuse your connection and return empty responses), the scraping script will only pull data for one city per run of the script. In the future, this process will be automated by a job queue implementation. At present the scraping script is run via CLI that takes the desired city as an argument when executed.
+The data scraping script can request physician data based on any of the form options given on the [College of Physicians](https://www.cpsbc.ca/physician_search) search page.
+
+ Due to limitations with the number of requests allowed per time period (before refusing your connection and returning empty responses), the scraping script will only pull data for doctors residing in one particular city per run of the script.
+
+At present the scraping script is run via a CLI that takes the desired city to query as an argument when executed. In the future this process will be automated by a job queue implementation which would step through a list of cities, and save doctor data for each one automatically.
 
  ### CLI
- To make the scraping of one city less tedious, the app has a list of all BC municipalities, sorted by decreasing population, stored in an array and exported for use. Instead of having to type the city name, you only provide its index in the list of cities.
+ To make the scraping of one city less tedious, the app has a [list of all BC municipalities](http://www2.gov.bc.ca/gov/content/data/statistics/people-population-community/population/population-estimates) sorted by decreasing population, stored in an array and exported for use. Instead of having to type the city name, you only provide its index in the list of cities.
 
  For example, to scrape all doctor data and associated reviews for Vancouver, you would run the scraper CLI like so:
 
@@ -84,13 +88,13 @@ To use the service, please see the repo for the [React client](https://github.co
  $ node jobs/scrapeDoctorDataCLI.js 0
  ```
 
- This will scrape all doctors accepting new patients in Vancouver, their reviews, and contact info and append the JSON data to a text file found here:
+ This will scrape all doctors accepting new patients in Vancouver, their contact info, and reviews on RateMDs, and append the JSON data to a file found here:
 
  ```
- ./data/doctorData.txt
+ ./data/doctorData.dat
  ```
 
- This allows you to drill through the list of cities quickly by repeating your terminal commands, changing only the city index each time, and the scraper will keep appending new data to the data file.
+ This allows you to drill through the list of cities to query very quickly by repeating your terminal commands, changing only the city index argument each time, and the scraper will keep appending new data to the end of the data file.
 
  ### Helper Scripts
 If you wish to only scrape specific cities, you can easily find their indices by running a helper script that prints a table of all cities and their indices:
@@ -108,16 +112,44 @@ Index			City
                 ...
 ```
 
- To find a specific city's index, run this helper script with the city name as an argument (quotes are required for city names with spaces):
+ To find a specific city's index in the list, run this helper script with the city name as an argument (quotes are required for city names with spaces):
 
  ```
  $ node data/printCityIndex.js 'New Westminster'
  16
  ```
-
+ ```
+ $ node data/printCityIndex.js Burnaby
+ 2
+ ```
+ ```
+ $ node data/printCityIndex.js Fantasia
+ -1
+ ```
  ### Scrubbing Data
- When satisfied with the data collected, we need to "scrub" the data first before saving it to the database. The scrubbing script removes any duplicated entries, unwanted formatting, and flattens the nested array structure.
+ When satisfied with the amount of data collected, we need to "scrub" the data before saving it to the database using this script:
 
  ```
  $ node jobs/scrubDoctorData.js
  ```
+
+ The scrubbing script removes any duplicate entries, unwanted formatting, and flattens the nested array structure found in the data file. The scrubbed data is assigned to an array constant that is exported for use inside this JavaScript file:
+
+ ```
+ ./data/doctorData.js
+ ```
+
+ ### Saving Data
+
+ To persist the scrubbed data to the database, run the save script:
+
+ ```
+ $ node jobs/saveDoctorData.js
+ ```
+
+ The script will do a graph insert to the Postgres data base, where all associated data will be placed in the correct tables automatically.
+
+
+
+
+ 

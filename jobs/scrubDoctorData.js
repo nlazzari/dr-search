@@ -7,7 +7,7 @@
 
 
 const file            = require('fs-promise');
-const doctorDataFile  = 'doctorData.txt';
+const doctorDataFile  = 'doctorData.dat';
 const doctorDataJs    = 'doctorData.js'
 
 // takes an array of doctor records, and returns only unique doctor records
