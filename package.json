@@ -6,7 +6,14 @@
   "repository": {},
   "scripts": {
     "start": "nodemon app.js",
-    "debug": "node --inspect app.js"
+    "debug": "node --inspect app.js",
+    "data:init": "node jobs/initDoctorData.js",
+    "data:scrape": "node jobs/scrapeDoctorDataCLI.js",
+    "data:scrub": "node jobs/scrubDoctorData.js",
+    "data:save": "node jobs/saveDoctorData.js",
+    "data:city:list": "node data/printCityList.js",
+    "data:city:index": "node data/printCityIndex.js",
+    "db:seed": "node jobs/seedDoctorData.js"
   },
   "author": "Neal Lazzari",
   "license": "MIT",

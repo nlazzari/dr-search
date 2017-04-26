@@ -53,10 +53,15 @@ Next, run the knex migrations, which will create all the necessary database tabl
 $ knex migrate:latest
 ```  
 
-Seed the database with pre-scraped data (doctors accepting patients residing in the top 50 largest municipalities by population) by running this job script:
+Seed the database with pre-scraped data (doctors accepting patients residing in the top 50 largest municipalities by population) by running this seeding script with the command
 ```
-$ node jobs/seedDoctorData.js
+$ yarn run db:seed
 ```
+or
+```
+$ npm run db:seed
+```
+
 
 ### Server
 Lastly, start the server with either:
@@ -85,7 +90,7 @@ At present the scraping script is run via a CLI that takes the desired city to q
  For example, to scrape all doctor data and associated reviews for Vancouver, you would run the scraper CLI like so:
 
  ```
- $ node jobs/scrapeDoctorDataCLI.js 0
+ $ yarn run data:scrape -- 0
  ```
 
  This will scrape all doctors accepting new patients in Vancouver, their contact info, and reviews on RateMDs, and append the JSON data to a file found here:
@@ -100,7 +105,8 @@ At present the scraping script is run via a CLI that takes the desired city to q
 If you wish to only scrape specific cities, you can easily find their indices by running a helper script that prints a table of all cities and their indices:
 
 ```
-$ node data/printCityList.js
+$ yarn run data:city:list
+                ...
 Index			City
 ------------------------------------------
    0			Vancouver
@@ -115,22 +121,22 @@ Index			City
  To find a specific city's index in the list, run this helper script with the city name as an argument (quotes are required for city names with spaces):
 
  ```
- $ node data/printCityIndex.js 'New Westminster'
- 16
+ $ yarn run data:city:index -- 'New Westminster'
+ New Westminster has an index of 16.
  ```
  ```
- $ node data/printCityIndex.js Burnaby
- 2
+ $ yarn run data:city:index -- Burnaby
+ Burnaby has an index of 2.
  ```
  ```
- $ node data/printCityIndex.js Fantasia
- -1
+ $ yarn run data:city:index -- Fantasia
+ Sorry, Fantasia is not in the list.
  ```
  ### Scrubbing Data
  When satisfied with the amount of data collected, we need to "scrub" the data before saving it to the database using this script:
 
  ```
- $ node jobs/scrubDoctorData.js
+ $ yarn run data:scrub
  ```
 
  The scrubbing script removes any duplicate entries, unwanted formatting, and flattens the nested array structure found in the data file. The scrubbed data is assigned to an array constant that is exported for use inside this JavaScript file:
@@ -144,12 +150,7 @@ Index			City
  To persist the scrubbed data to the database, run the save script:
 
  ```
- $ node jobs/saveDoctorData.js
+ $ yarn run data:save
  ```
 
  The script will do a graph insert to the Postgres data base, where all associated data will be placed in the correct tables automatically.
-
-
-
-
- 

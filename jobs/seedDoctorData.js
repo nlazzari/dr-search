@@ -17,7 +17,7 @@ Doctor
   .allowInsert('[contactInfo, rateMyMDRating]') // allow eager on relational data
   .insertGraph(doctorSeedData)      // batch insertion of all doctor data
   .then((returnStuff) => {
-    console.log(returnStuff);
+    // console.log(returnStuff);
     console.log('Successfully seeded database.');
     process.exit();
   })

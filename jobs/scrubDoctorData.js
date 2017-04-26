@@ -35,9 +35,25 @@ function fileRead(fileName) {
   return file.readFile(__dirname + '/../data/' + fileName, {encoding:'utf8'});
 }
 
-// Read all doctor object records from doctorDataFile, parse them into a JSON
-// array,
-fileRead(doctorDataFile)
+function fileWrite(fileName, data) {
+  return file.writeFile(__dirname + '/../data/' + fileName, data);
+}
+
+/// BEGIN SCRUBBING OPERATIONS
+// First erase the contents of doctorDataJs file before reading doctorDataFile,
+// and writing its contents into doctorDataJs
+fileWrite(doctorDataJs, '')
+  .then( err => {
+    if (err) throw err;
+
+    console.log(`\n\nScrub Doctor Data Script`);
+    console.log(    `------------------------`);
+    console.log(`Initialized:\t\t\t${doctorDataJs}`);
+
+    // Read all doctor object records from doctorDataFile, parse them into a JSON
+    // array,
+    return fileRead(doctorDataFile);
+  })
   .then((data) => {
     let    flattened  = [];
     let    js = '';
@@ -54,13 +70,15 @@ fileRead(doctorDataFile)
     // remove duplicate doctor records
     flattened = uniqueDoctors(flattened);
 
-    console.dir(flattened,  { depth: null });
+    // console.dir(flattened,  { depth: null });
 
     // make template text that is declaring the scrubbed data
     // as a giant javascript array
     js = `const doctors = \n\n` +
           `${JSON.stringify(flattened)}\n\n` +
           `module.exports = doctors;` ;
+
+    console.log(`Scrubbed data from:\t\t${doctorDataFile}`);
 
     // add the javascript template text to doctorDataJs to be imported into
     // the database using saveDoctorData.js
@@ -69,7 +87,7 @@ fileRead(doctorDataFile)
   .then( err => {
     if (err) throw err;
 
-    console.log(`\n\nData appended to ${doctorDataJs}`);
+    console.log(`Saved scrubbed data to:\t\t${doctorDataJs}\n\n`);
     process.exit();
   })
   .catch(err => {
