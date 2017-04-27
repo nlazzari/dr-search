@@ -154,3 +154,11 @@ Index			City
  ```
 
  The script will do a graph insert to the Postgres data base, where all associated data will be placed in the correct tables automatically.
+
+ ### Initializing Data
+
+ Once you've saved the data, perhaps you want to start fresh and scrape some new data. To erase the contents of the doctor data files, run the init script:
+
+ ```
+ $ yarn run data:init
+ ```
